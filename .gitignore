@@ -1,0 +1,28 @@
+```gitignore
+# 编译产物
+*.exe
+*.o
+*.obj
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# Interception 库文件（由用户自行下载）
+interception.h
+interception.lib
+interception.dll
+
+# 编辑器临时文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统临时文件
+Thumbs.db
+.DS_Store
+
+# 其他
+*.log
+```
