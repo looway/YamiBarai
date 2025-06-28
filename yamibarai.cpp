@@ -24,9 +24,9 @@ constexpr USHORT SC_H = 0x23; // 右站位触发
 inline void ms(int t) { std::this_thread::sleep_for(std::chrono::milliseconds(t)); }
 
 // 延时常量（适配拳皇97）
-const int DELAY_DOWN = 25;    // 方向键按下
-const int DELAY_FORWARD = 25; // 方向键组合
-const int DELAY_PUNCH = 15;   // 拳/脚
+const int DELAY_DOWN = 40;    // 方向键按下
+const int DELAY_FORWARD = 40; // 方向键组合
+const int DELAY_PUNCH = 30;   // 拳/脚
 
 // 八神庵 - 暗拂 (↓↘→+C)
 void sendYamiBarai(InterceptionContext ctx, int device, bool leftSide) {
@@ -69,9 +69,29 @@ void sendYamiBarai(InterceptionContext ctx, int device, bool leftSide) {
 // 陈国汉 - 铁球飞押しつぶし (↓↙←+C)
 void sendTekkyuTobiOshitsubushi(InterceptionContext ctx, int device, bool leftSide) {
     USHORT sc_down = SC_S;
-    USHORT sc_forward = leftSide ? SC_A : SC_D;
+    USHORT sc_forward = leftSide ? SC_D : SC_A;
     USHORT sc_punch = SC_I;
     InterceptionKeyStroke stroke{};
+    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_DOWN;
+    #if DEBUG_LOG == 1
+    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
+    #endif
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
+    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_DOWN;
+    #if DEBUG_LOG == 1
+    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
+    #endif
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
+    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_UP;
+    #if DEBUG_LOG == 1
+    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
+    #endif
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
+    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_UP;
+    #if DEBUG_LOG == 1
+    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
+    #endif
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
     stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_DOWN;
     #if DEBUG_LOG == 1
     std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
