@@ -3,6 +3,10 @@
 #include <chrono>
 #include <windows.h>
 #include "interception.h"
+#include <random>
+#include <functional>
+#include <vector>
+#include <string>
 
 // —— 宏定义：控制是否打印调试日志 ——
 // 1: 启用调试日志, 0: 禁用调试日志
@@ -23,9 +27,18 @@ constexpr USHORT SC_H = 0x23; // 右站位触发
 // 延时单位
 inline void ms(int t) { std::this_thread::sleep_for(std::chrono::milliseconds(t)); }
 
+// 随机延时函数，范围[min_ms, max_ms]
+inline void ms_random(int min_ms, int max_ms) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(min_ms, max_ms);
+    std::this_thread::sleep_for(std::chrono::milliseconds(dist(gen)));
+}
+
 // 延时常量（适配拳皇97）
 const int DELAY_DOWN = 40;    // 方向键按下
 const int DELAY_FORWARD = 40; // 方向键组合
+const int DELAY_BACKWARD = 40; // 方向键组合
 const int DELAY_PUNCH = 30;   // 拳/脚
 
 // 八神庵 - 暗拂 (↓↘→+C)
@@ -38,27 +51,32 @@ void sendYamiBarai(InterceptionContext ctx, int device, bool leftSide) {
     #if DEBUG_LOG == 1
     std::cout << "YamiBarai: code=" << stroke.code << ", state=" << stroke.state << std::endl;
     #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); 
+    ms_random(DELAY_DOWN - 10, DELAY_DOWN + 10);
     stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_DOWN;
     #if DEBUG_LOG == 1
     std::cout << "YamiBarai: code=" << stroke.code << ", state=" << stroke.state << std::endl;
     #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); 
+    ms_random(DELAY_FORWARD - 10, DELAY_FORWARD + 10);
     stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_UP;
     #if DEBUG_LOG == 1
     std::cout << "YamiBarai: code=" << stroke.code << ", state=" << stroke.state << std::endl;
     #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); 
+    ms_random(DELAY_DOWN - 10, DELAY_DOWN + 10);
     stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_UP;
     #if DEBUG_LOG == 1
     std::cout << "YamiBarai: code=" << stroke.code << ", state=" << stroke.state << std::endl;
     #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); 
+    ms_random(DELAY_FORWARD - 10, DELAY_FORWARD + 10);
     stroke.code = sc_punch; stroke.state = INTERCEPTION_KEY_DOWN;
     #if DEBUG_LOG == 1
     std::cout << "YamiBarai: code=" << stroke.code << ", state=" << stroke.state << std::endl;
     #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_PUNCH);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); 
+    ms_random(DELAY_PUNCH - 10, DELAY_PUNCH + 10);
     stroke.code = sc_punch; stroke.state = INTERCEPTION_KEY_UP;
     #if DEBUG_LOG == 1
     std::cout << "YamiBarai: code=" << stroke.code << ", state=" << stroke.state << std::endl;
@@ -66,188 +84,94 @@ void sendYamiBarai(InterceptionContext ctx, int device, bool leftSide) {
     interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
 }
 
-// 陈国汉 - 铁球飞押しつぶし (↓↙←+C)
-void sendTekkyuTobiOshitsubushi(InterceptionContext ctx, int device, bool leftSide) {
+// 八神庵 - 八稚女 (↓↘→↘↓↙←+A/C)
+void sendYaotome(InterceptionContext ctx, int device, bool leftSide) {
     USHORT sc_down = SC_S;
     USHORT sc_forward = leftSide ? SC_D : SC_A;
+    USHORT sc_backward = leftSide ? SC_A : SC_D;
     USHORT sc_punch = SC_I;
-    InterceptionKeyStroke stroke{};
-    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
-    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
-    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
-    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
-    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
-    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
-    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
-    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
-    stroke.code = sc_punch; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_PUNCH);
-    stroke.code = sc_punch; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "TekkyuTobiOshitsubushi: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
-}
 
-// 八神庵 - 鬼烧 (↓↘→+A)
-void sendOniyaki(InterceptionContext ctx, int device, bool leftSide) {
-    USHORT sc_down = SC_S;
-    USHORT sc_forward = leftSide ? SC_D : SC_A;
-    USHORT sc_punch = SC_U;
     InterceptionKeyStroke stroke{};
-    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "Oniyaki: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
-    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "Oniyaki: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
-    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "Oniyaki: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
-    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "Oniyaki: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
-    stroke.code = sc_punch; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "Oniyaki: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_PUNCH);
-    stroke.code = sc_punch; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "Oniyaki: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
-}
 
-// 大门五郎 - 地雷震 (↓↘→↓↘→+A)
-void sendJiraiShin(InterceptionContext ctx, int device, bool leftSide) {
-    USHORT sc_down = SC_S;
-    USHORT sc_forward = leftSide ? SC_D : SC_A;
-    USHORT sc_punch = SC_U;
-    InterceptionKeyStroke stroke{};
-    // 第一组 ↓↘→
+    // ↓
     stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
+    ms_random(DELAY_DOWN - 10, DELAY_DOWN + 10);
+
+    // ↘（下+前）
     stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
+    ms_random(DELAY_FORWARD - 10, DELAY_FORWARD + 10);
+
+    // 只松开下
     stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
-    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
-    // 第二组 ↓↘→
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
+    ms_random(DELAY_DOWN - 10, DELAY_DOWN + 10);
+
+    // →（只保留前）
+    // 这里其实前已经按下，无需重复
+
+    // ↘（下+前）
     stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
-    stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
-    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_DOWN);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
+    ms_random(DELAY_FORWARD - 10, DELAY_FORWARD + 10);
+
+    // ↓（只保留下）
     stroke.code = sc_forward; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_FORWARD);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
+    ms_random(DELAY_DOWN - 10, DELAY_DOWN + 10);
+
+    // ↙（下+后）
+    stroke.code = sc_backward; stroke.state = INTERCEPTION_KEY_DOWN;
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
+    ms_random(DELAY_FORWARD - 10, DELAY_FORWARD + 10);
+
+    // ←（只保留后）
+    stroke.code = sc_down; stroke.state = INTERCEPTION_KEY_UP;
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
+    ms_random(DELAY_DOWN - 10, DELAY_DOWN + 10);
+
+    // 松开后
+    stroke.code = sc_backward; stroke.state = INTERCEPTION_KEY_UP;
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
+    ms_random(DELAY_FORWARD - 10, DELAY_FORWARD + 10);
+
     // 拳
     stroke.code = sc_punch; stroke.state = INTERCEPTION_KEY_DOWN;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
-    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1); ms(DELAY_PUNCH);
+    interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
+    ms_random(DELAY_PUNCH - 10, DELAY_PUNCH + 10);
     stroke.code = sc_punch; stroke.state = INTERCEPTION_KEY_UP;
-    #if DEBUG_LOG == 1
-    std::cout << "JiraiShin: code=" << stroke.code << ", state=" << stroke.state << std::endl;
-    #endif
     interception_send(ctx, device, (InterceptionStroke*)&stroke, 1);
 }
 
+struct SkillEntry {
+    std::string name;
+    std::function<void(InterceptionContext, int, bool)> func;
+};
+
 int main() {
-    // 提示用户选择招式
+    // 招式列表，后续只需在这里添加新招式
+    std::vector<SkillEntry> skills = {
+        { "Iori Yagami - YamiBarai (Dark Thrust)", sendYamiBarai },
+        { "Iori Yagami - Yaotome (Maiden Masher)", sendYaotome }
+        // 继续添加新招式，如 { "xxx", sendXxx }
+    };
+
     std::cout << "YamiBarai - The King of Fighters '97 Move Injector\n";
     std::cout << "Select a move to trigger with G (left-side) or H (right-side):\n";
-    std::cout << "0: Iori Yagami - YamiBarai (Dark Thrust)\n";
-    std::cout << "1: Chang Koehan - Tekkyu Tobi Oshitsubushi (Iron Ball Flying Crush)\n";
-    std::cout << "2: Iori Yagami - Oniyaki (Demon Scorcher)\n";
-    std::cout << "3: Goro Daimon - Jirai Shin (Earthquake)\n";
-    std::cout << "Enter move number (0-3): ";
-    
-    int skill;
+    for (size_t i = 0; i < skills.size(); ++i) {
+        std::cout << i << ": " << skills[i].name << "\n";
+    }
+    std::cout << "Enter move number (0-" << (skills.size() - 1) << "): ";
+
+    int skill = 0;
     std::cin >> skill;
-    if (skill < 0 || skill > 3) {
-        std::cerr << "Invalid choice, defaulting to YamiBarai (0)\n";
+    if (skill < 0 || skill >= static_cast<int>(skills.size())) {
+        std::cerr << "Invalid choice, defaulting to " << skills[0].name << " (0)\n";
         skill = 0;
     }
-    
-    // 显示选择结果
-    std::cout << "Selected move: ";
-    switch (skill) {
-        case 0: std::cout << "YamiBarai\n"; break;
-        case 1: std::cout << "Tekkyu Tobi Oshitsubushi\n"; break;
-        case 2: std::cout << "Oniyaki\n"; break;
-        case 3: std::cout << "Jirai Shin\n"; break;
-    }
+
+    std::cout << "Selected move: " << skills[skill].name << "\n";
     std::cout << "Press G for left-side (facing right), H for right-side (facing left). Ctrl+C to exit.\n";
 
     InterceptionContext ctx = interception_create_context();
@@ -269,22 +193,9 @@ int main() {
         #if DEBUG_LOG == 1
         std::cout << "Received: code=" << code << ", state=" << state << std::endl;
         #endif
-        if (state == INTERCEPTION_KEY_DOWN && code == SC_G) {
-            switch (skill) {
-                case 0: sendYamiBarai(ctx, device, true); break;
-                case 1: sendTekkyuTobiOshitsubushi(ctx, device, true); break;
-                case 2: sendOniyaki(ctx, device, true); break;
-                case 3: sendJiraiShin(ctx, device, true); break;
-            }
-            continue;
-        }
-        else if (state == INTERCEPTION_KEY_DOWN && code == SC_H) {
-            switch (skill) {
-                case 0: sendYamiBarai(ctx, device, false); break;
-                case 1: sendTekkyuTobiOshitsubushi(ctx, device, false); break;
-                case 2: sendOniyaki(ctx, device, false); break;
-                case 3: sendJiraiShin(ctx, device, false); break;
-            }
+        if ((code == SC_G || code == SC_H) && state == INTERCEPTION_KEY_DOWN) {
+            bool leftSide = (code == SC_G);
+            skills[skill].func(ctx, device, leftSide);
             continue;
         }
         interception_send(ctx, device, &stroke_raw, 1);

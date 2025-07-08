@@ -2,6 +2,16 @@
 
 YamiBarai 是一个为《拳皇97》（The King of Fighters '97）设计的 C++ 程序，基于 Interception 库，用于实现“一键出招”。玩家在程序启动时通过终端选择招式（八神庵的“暗拂”、陈国汉的“铁球飞押しつぶし”、八神庵的“鬼烧”或大门五郎的“地雷震”），然后通过按下 `G` 或 `H` 键，根据角色站位触发所选招式。程序拦截键盘输入，模拟精确的按键序列，适合简化操作或练习连招。
 
+## 主要更新说明
+
+> **2024年7月更新：代码结构与招式选择机制优化**
+>
+> - 现在所有招式函数和名称都集中在 `std::vector<SkillEntry> skills` 列表中，添加新招式只需在该列表中增加一行，无需修改 main 函数其他部分。
+> - 已移除陈国汉“铁球飞押しつぶし”、八神庵“鬼烧”、大门五郎“地雷震”相关函数和菜单项，当前仅支持八神庵“暗拂”和“八稚女”。
+> - 招式选择界面和逻辑已自动适配 `skills` 列表，无需手动维护编号和 switch/case。
+> - 所有延时均已替换为 `ms_random` 随机延时，模拟更真实的人类输入。
+> - 示例招式添加方式见 yamibarai.cpp 注释。
+
 ## 功能
 - **按键映射**：
   - 方向键：`W`（上）、`S`（下）、`A`（左）、`D`（右）。
@@ -11,16 +21,11 @@ YamiBarai 是一个为《拳皇97》（The King of Fighters '97）设计的 C++ 
   - 按 `H`：右站位（面向左），触发所选招式。
 - **支持招式**：
   - 八神庵 - 暗拂（↓↘→+C，即 S→D→I 或 S→A→I）。
-  - 陈国汉 - 铁球飞押しつぶし（↓↘→↓↘→+A，即 即 S→D→S→D→U 或 S→A→S→A→U）。
-  - 八神庵 - 鬼烧（↓↘→+A，即 S→D→U 或 S→A→U）。
-  - 大门五郎 - 地雷震（↓↘→↓↘→+A，即 S→D→S→D→U 或 S→A→S→A→U）。
+  - 八神庵 - 八稚女（↓↘→↘↓↙←+C，即 S→D→S→D→S→A→I 或 S→A→S→A→S→D→I）。
 - **招式选择**：
-  - 程序启动时，提示用户输入招式编号：
-    - `0`：暗拂
-    - `1`：铁球飞押しつぶし
-    - `2`：鬼烧
-    - `3`：地雷震
-  - 无效输入默认使用暗拂（0）。
+  - 程序启动时，自动根据 `skills` 列表展示所有可用招式及编号。
+  - 输入编号选择招式，编号范围自动适配（如 `0` 或 `1`）。
+  - 无效输入默认使用第一个招式。
 - **调试日志**：
   - 通过宏定义 `DEBUG_LOG` 控制是否打印按键序列（1：启用，0：禁用）。
 - 其他按键：原样转发，不影响游戏操作。
@@ -93,14 +98,12 @@ YamiBarai 是一个为《拳皇97》（The King of Fighters '97）设计的 C++ 
    - 程序启动时显示：
      ```
      YamiBarai - The King of Fighters '97 Move Injector
-     Select a move to trigger with G (left-side) or H (right-side):
-     0: Iori Yagami - YamiBarai (Dark Thrust)
-     1: Chang Koehan - Tekkyu Tobi Oshitsubushi (Iron Ball Flying Crush)
-     2: Iori Yagami - Oniyaki (Demon Scorcher)
-     3: Goro Daimon - Jirai Shin (Earthquake)
-     Enter move number (0-3): 
+      Select a move to trigger with G (left-side) or H (right-side):
+      0: Iori Yagami - YamiBarai (Dark Thrust)
+      1: Iori Yagami - Yaotome (Maiden Masher)
+      Enter move number (0-1): 
      ```
-   - 输入招式编号（0-3），然后按 `G`（左站位）或 `H`（右站位）触发所选招式。
+   - 输入招式编号（0-1），然后按 `G`（左站位）或 `H`（右站位）触发所选招式。
    - 如果 `DEBUG_LOG=1`，控制台显示按键序列。
    - 其他按键正常转发，不影响游戏操作。
 3. **调试日志**：
@@ -148,3 +151,7 @@ YamiBarai 是一个为《拳皇97》（The King of Fighters '97）设计的 C++ 
   - 某些模拟器可能有输入延迟，尝试增加延时（如 `DELAY_DOWN=30`）。
 - **站位判断**：
   - 玩家需手动判断角色站位（左站位用 `G`，右站位用 `H`）。
+  **说明：**
+- 你只需维护 `skills` 列表即可添加/删除招式，README 已同步反映此机制。
+- 旧的编号、switch/case、冗余函数说明已删除，文档与代码保持一致。
+- 若有新招式，按上述“添加新招式方法”操作即可。
